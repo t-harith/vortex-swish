@@ -30,6 +30,26 @@
 `define VX_DCR_BASE_STATE(addr)         ((addr) - `VX_DCR_BASE_STATE_BEGIN)
 `define VX_DCR_BASE_STATE_COUNT         (`VX_DCR_BASE_STATE_END-`VX_DCR_BASE_STATE_BEGIN)
 
+// Simbricks Infrastructure registers /////////////////////////////////////////
+
+`define SB_INFRA_PROC_START             12'h007
+`define SB_INFRA_MEM_FREE               12'h008
+`define SB_INFRA_MEM_USED               12'h009
+`define SB_INFRA_MEM_ADDR               12'h00a
+`define SB_INFRA_MEM_SIZE               12'h00b
+`define SB_INFRA_MEM_FLAGS              12'h00c
+`define SB_INFRA_MEM_CMD                12'h00d
+`define SB_INFRA_MEM_RETURNC            12'h00e
+`define SB_INFRA_ACL_SET                12'h00f
+`define SB_INFRA_ACL_SADDR              12'h010
+`define SB_INFRA_ACL_SIZE               12'h011
+`define SB_INFRA_ACL_FLAGS              12'h012
+`define SB_INFRA_ACL_EN                 12'h013
+
+`define SB_INFRA_MEM_CMD_ALLOC          1
+`define SB_INFRA_MEM_CMD_RESERVE        2
+`define SB_INFRA_MEM_CMD_RELEASE        3
+
 // Machine Performance-monitoring counters classes ////////////////////////////
 
 `define VX_DCR_MPM_CLASS_NONE           0
