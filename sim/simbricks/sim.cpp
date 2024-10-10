@@ -253,7 +253,7 @@ bool MMIOWriteInfra(volatile struct SimbricksProtoPcieH2DWrite *write) {
       mem_flags = val;
       break;
     case SB_INFRA_MEM_CMD:
-      mem_cmd = val;
+      mem_cmd = 0;
       if(val == SB_INFRA_MEM_CMD_ALLOC)
         mem_returncode = global_mem.allocate(mem_size, &mem_addr);
       else if (val == SB_INFRA_MEM_CMD_RESERVE)

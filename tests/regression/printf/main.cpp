@@ -74,6 +74,7 @@ int main(int argc, char *argv[]) {
   std::cout << "open device connection" << std::endl;
   RT_CHECK(vx_dev_open(&device));
 
+  std::cout << "...  device opened" << std::endl;
   uint64_t num_cores, num_warps, num_threads;
   RT_CHECK(vx_dev_caps(device, VX_CAPS_NUM_CORES, &num_cores));
   RT_CHECK(vx_dev_caps(device, VX_CAPS_NUM_WARPS, &num_warps));
@@ -89,8 +90,9 @@ int main(int argc, char *argv[]) {
   kernel_arg.num_points = num_points;
 
   // allocate device memory
-  std::cout << "allocate device memory" << std::endl;
+  std::cout << "allocates device memory" << std::endl;
   RT_CHECK(vx_mem_alloc(device, buf_size, VX_MEM_READ, &src_buffer));
+  std::cout << "allocation done device memory" << std::endl;
   RT_CHECK(vx_mem_address(src_buffer, &kernel_arg.src_addr));
 
   std::cout << "dev_src=0x" << std::hex << kernel_arg.src_addr << std::endl;
