@@ -29,4 +29,4 @@ clean:
 	$(MAKE) clean -C xrt
 	$(MAKE) clean -C simbricks
 
-.PHONY: all stub simx rtlsim opae xrt clean
+.PHONY: all stub simx rtlsim opae xrt simbricks clean
