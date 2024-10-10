@@ -289,6 +289,7 @@ public:
 
         // start new run
         // TODO Simbricks start
+        this->reset();
         ACCESS_REG8(SB_INFRA_PROC_START) = true;
 
         future_ = std::async(std::launch::async, [&]{
@@ -299,6 +300,10 @@ public:
         mpm_cache_.clear();
 
         return 0;
+    }
+
+    void reset () {
+        ACCESS_REG8(SB_INFRA_PROC_RST) = true;
     }
 
     int ready_wait(uint64_t timeout) {
@@ -319,9 +324,9 @@ public:
     }
 
     int dcr_write(uint32_t addr, uint32_t value) {
-        if (future_.valid()) {
-            future_.wait(); // ensure prior run completed
-        }
+        //if (future_.valid()) {
+        //    future_.wait(); // ensure prior run completed
+        //}
         // Simbricks DCR write
         ACCESS_REG(addr) = value; 
         //dcrs_.write(addr, value);
@@ -395,6 +400,7 @@ extern int vx_dev_close(vx_device_h hdevice) {
     DBGPRINT("DEV_CLOSE: hdevice=%p\n", hdevice);
 
     auto device = ((vx_device*)hdevice);
+    device->reset();
 
     delete device;
 

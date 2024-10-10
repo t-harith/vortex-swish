@@ -183,7 +183,7 @@ public:
   }
 
   int run() {
-    int exitcode = device_->busy;
+    int exitcode = 0;
 
   #ifndef NDEBUG
     std::cout << std::dec << timestamp << ": [sim] run()" << std::endl;
@@ -193,10 +193,10 @@ public:
     running_ = true;
     device_->reset = 0;
 
-    //// wait on device to go busy
-    //while (!device_->busy) {
-    //  this->tick();
-    //}
+    // wait on device to go busy
+    while (!device_->busy) {
+      this->tick();
+    }
 
     //// wait on device to go idle
     //while (device_->busy) {
@@ -261,13 +261,10 @@ public:
       }
     }
 
-    this->cout_flush();
   #ifndef NDEBUG
     fflush(stdout);
   #endif
   }
-
-private:
 
   void reset() {
     running_ = false;
@@ -296,6 +293,12 @@ private:
       this->eval();
     }
   }
+
+  int get_busy () {
+    return device_->busy;
+  }
+
+private:
 
   void eval() {
     device_->eval();
@@ -546,6 +549,7 @@ private:
             }
             printf("\n");
           */
+
           for (int i = 0; i < MEM_BLOCK_SIZE; i++) {
             if ((byteen >> i) & 0x1) {
               (*ram_)[byte_addr + i] = data[i];
@@ -679,6 +683,14 @@ void Processor::attach_ram(RAM* mem) {
 
 int Processor::run() {
   return impl_->run();
+}
+
+int Processor::get_busy() {
+  return impl_->get_busy();
+}
+
+void Processor::reset() {
+  impl_->reset();
 }
 
 void Processor::tick() {

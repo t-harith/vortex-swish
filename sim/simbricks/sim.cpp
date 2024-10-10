@@ -154,8 +154,7 @@ bool MMIOReadInfra(volatile struct SimbricksProtoPcieH2DRead *read) {
   uint64_t val = 0;
 
   switch(read->offset) {
-    case SB_INFRA_PROC_START:
-      val = processor->run(); // returns true if device is running.
+    case SB_INFRA_PROC_RST:
       break;
     case SB_INFRA_MEM_FREE:
       val = global_mem.free();
@@ -236,9 +235,6 @@ bool MMIOWriteInfra(volatile struct SimbricksProtoPcieH2DWrite *write) {
   memcpy(&val, (const void *) write->data, write->len);
 
   switch(write->offset) {
-    case SB_INFRA_PROC_START:
-      processor->run();
-      break;
     case SB_INFRA_MEM_FREE:
       break;
     case SB_INFRA_MEM_USED:
@@ -263,9 +259,6 @@ bool MMIOWriteInfra(volatile struct SimbricksProtoPcieH2DWrite *write) {
       break;
     case SB_INFRA_MEM_RETURNC:
       break;
-    case SB_INFRA_ACL_SET:
-      ram.set_acl(acl_saddr, acl_size, acl_flags);
-      break;
     case SB_INFRA_ACL_SADDR:
       acl_saddr = val;
       break;
@@ -274,9 +267,6 @@ bool MMIOWriteInfra(volatile struct SimbricksProtoPcieH2DWrite *write) {
       break;
     case SB_INFRA_ACL_FLAGS:
       acl_flags = val;
-      break;
-    case SB_INFRA_ACL_EN:
-      ram.enable_acl(val);
       break;
     default:
       return false;
@@ -314,9 +304,22 @@ static void MMIOPoll() {
     if (op->write) {
       dprintf("MMIO Write Complete: id %lu\n", op->opaque);
     } else {
+      uint64_t val = 0;
+      switch(op->offset) {
+        case SB_INFRA_PROC_START:
+          val = processor->get_busy(); // returns true if device is running.
+          break;
+        default:
+          break;
+      }
       dprintf("MMIO Read Complete: id %lu val %lx\n", op->opaque,
-        (uint64_t) 0);
-      assert(false);
+        (uint64_t) val);
+      volatile union SimbricksProtoPcieD2H *msg = AllocPcieOut();
+      volatile struct SimbricksProtoPcieD2HReadcomp *rc = &msg->readcomp;
+      rc->req_id = op->opaque; // set req id so host can match resp to a req
+      memcpy((void *) rc->data, &val, 8);
+      SendPcieOut(msg, SIMBRICKS_PROTO_PCIE_D2H_MSG_READCOMP);
+
     }
 
     delete op;
@@ -332,11 +335,28 @@ static void MMIOPoll() {
         printf("DCR write to  0x%lx = 0x%lx\n", op->offset, op->val);
         processor->dcr_write((uint32_t) op->offset, (uint32_t) op->val);
       } else {
-        ram.write(&op->val, op->offset, 1);
+        switch(op->offset) {
+          case SB_INFRA_PROC_RST:
+            printf("Resetting processor\n");
+            processor->reset();
+            break;
+          case SB_INFRA_PROC_START:
+            printf("Starting processor\n");
+            processor->run();
+            break;
+          case SB_INFRA_ACL_SET:
+            ram.set_acl(acl_saddr, acl_size, acl_flags);
+            break;
+          case SB_INFRA_ACL_EN:
+            ram.enable_acl(op->val);
+            break;
+          default:
+            ram.write(&op->val, op->offset, 1);
+            break;
+        }
       }
     } else {
       dprintf("MMIO Read Submit: id %lu\n", op->opaque);
-      assert(false);
     }
 
     mmio_submitted = true;

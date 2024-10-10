@@ -45,6 +45,7 @@
 `define SB_INFRA_ACL_SIZE               12'h011
 `define SB_INFRA_ACL_FLAGS              12'h012
 `define SB_INFRA_ACL_EN                 12'h013
+`define SB_INFRA_PROC_RST               12'h014
 
 `define SB_INFRA_MEM_CMD_ALLOC          1
 `define SB_INFRA_MEM_CMD_RESERVE        2

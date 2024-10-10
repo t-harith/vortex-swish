@@ -29,9 +29,13 @@ public:
 
   int run();
 
+  void reset();
+
   void dcr_write(uint32_t addr, uint32_t value);
 
   void tick();
+
+  int get_busy();
 
 private:
 
