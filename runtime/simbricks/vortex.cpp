@@ -72,10 +72,6 @@ public:
     }
 
     int init() {
-        CHECK_ERR(dcr_initialize(this), {
-            return err;
-        });
-        profiling_id_ = profiling_add(this);
 
         size_t reg_len;
 
@@ -95,6 +91,11 @@ public:
             fprintf(stderr, "Enabling busmastering failed\n");
             return -1;
         }
+
+        CHECK_ERR(dcr_initialize(this), {
+            return err;
+        });
+        profiling_id_ = profiling_add(this);
 
         return 0;
     }
@@ -226,9 +227,9 @@ public:
         // ram_.write((const uint8_t*)src, dest_addr, size);
         // ram_.enable_acl(true);
         ACCESS_REG(SB_INFRA_ACL_EN) = false;
-        uint8_t* d = (uint8_t*)dest;
+        uint8_t* s = (uint8_t*)src;
         for (uint64_t i = 0; i < size; i++) {
-            ACCESS_REG8(addr + i) = d[i]; 
+            ACCESS_REG8(dest_addr + i) = s[i]; 
         }
         ACCESS_REG(SB_INFRA_ACL_EN) = true;
 
@@ -256,7 +257,7 @@ public:
         ACCESS_REG(SB_INFRA_ACL_EN) = false;
         uint8_t* d = (uint8_t*)dest;
         for (uint64_t i = 0; i < size; i++) {
-            d[i] = ACCESS_REG8(addr + i); 
+            d[i] = ACCESS_REG8(src_addr + i); 
         }
         ACCESS_REG(SB_INFRA_ACL_EN) = true;
 
@@ -326,7 +327,8 @@ public:
     int dcr_read(uint32_t addr, uint32_t* value) const {
         // Simbricks DCR read
         assert(false);
-        return ACCESS_REG(addr); 
+        *value = ACCESS_REG(addr); 
+        return -1;
         //return dcrs_.read(addr, value);
     }
 
@@ -422,7 +424,7 @@ extern int vx_mem_alloc(vx_device_h hdevice, uint64_t size, int flags, vx_buffer
 
     auto device = ((vx_device*)hdevice);
 
-    uint64_t dev_addr;
+    uint64_t dev_addr = 0;
     CHECK_ERR(device->mem_alloc(size, flags, &dev_addr), {
         return err;
     });
@@ -596,7 +598,7 @@ extern int vx_dcr_read(vx_device_h hdevice, uint32_t addr, uint32_t* value) {
 
     auto device = ((vx_device*)hdevice);
 
-    uint32_t _value;
+    uint32_t _value = 0;
 
     CHECK_ERR(device->dcr_read(addr, &_value), {
         return err;

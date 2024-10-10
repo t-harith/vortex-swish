@@ -52,7 +52,7 @@ static void PollPcie(void);
 static int ParseOptions(int argc, char *argv[]) {
     SimbricksPcieIfDefaultParams(&pcie_params);
 
-    if (argc < 5 && argc > 11) {
+    if (argc < 3 || argc > 7) {
         fprintf(stderr,
                 "Usage: accel-sim CLK-PERIOD PCI-SOCKET "
                 "SHM  [START-TICK] [SYNC-PERIOD] [PCI-LATENCY]\n");

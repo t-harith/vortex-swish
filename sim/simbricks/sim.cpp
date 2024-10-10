@@ -32,13 +32,15 @@
 #include <unistd.h>
 #include <util.h>
 #include <mem.h>
+#include <malloc.h>
+#include <utils.h>
 #include <VX_config.h>
 #include <VX_types.h>
 #include "processor.h"
 
 extern "C" {
-#include "../accel-sim/sim.h"
-#include "../common/reg_defs.h"
+#include "sim.h"
+//#include "../common/reg_defs.h"
 }
 
 //#define DEBUG
@@ -53,9 +55,9 @@ extern "C" {
 
 //#define TRACE_ENABLED
 //#ifdef TRACE_ENABLED
-#include <verilated_vcd_c.h>
-#endif
-#include <Vtop.h>
+//#include <verilated_vcd_c.h>
+//#endif
+//#include <Vtop.h>
 
 // uncomment to enable debug prints
 //#define DEBUG
@@ -97,7 +99,8 @@ static int acl_flags;
 int InitState(void) {
   char arg0[] = "hw/hw";
   char *vargs[2] = {arg0, NULL};
-  Verilated::commandArgs(1, vargs);
+  const char* program = "printf";
+//  Verilated::commandArgs(1, vargs);
 //#ifdef TRACE_ENABLED
 //  Verilated::traceEverOn(true);
 //#endif
@@ -116,18 +119,18 @@ int InitState(void) {
 #endif
 	processor->dcr_write(VX_DCR_BASE_MPM_CLASS, 0);
 
-	// load program
-	{
-		std::string program_ext(fileExtension(program));
-		if (program_ext == "bin") {
-			ram.loadBinImage(program, startup_addr);
-		} else if (program_ext == "hex") {
-			ram.loadHexImage(program);
-		} else {
-			std::cout << "*** error: only *.bin or *.hex images supported." << std::endl;
-			return -1;
-		}
-	}
+	//// load program
+	//{
+	//	std::string program_ext(fileExtension(program));
+	//	if (program_ext == "bin") {
+	//		ram.loadBinImage(program, startup_addr);
+	//	} else if (program_ext == "hex") {
+	//		ram.loadHexImage(program);
+	//	} else {
+	//		std::cout << "*** error: only *.bin or *.hex images supported." << std::endl;
+	//		return -1;
+	//	}
+	//}
   //top = new Vtop;
 
 //#ifdef TRACE_ENABLED
@@ -147,47 +150,47 @@ void Finalize(void) {
 //#endif
 }
 
-void MMIOReadInfra(volatile struct SimbricksProtoPcieH2DRead *read) {
+bool MMIOReadInfra(volatile struct SimbricksProtoPcieH2DRead *read) {
   uint64_t val = 0;
 
   switch(read->offset) {
-    case PROC_START:
+    case SB_INFRA_PROC_START:
       val = processor->run(); // returns true if device is running.
       break;
-    case MEM_FREE:
-      val = global_mem_.free();
+    case SB_INFRA_MEM_FREE:
+      val = global_mem.free();
       break;
-    case MEM_USED:
-      val = global_mem_.allocated();
+    case SB_INFRA_MEM_USED:
+      val = global_mem.allocated();
       break;
-    case MEM_ADDR:
+    case SB_INFRA_MEM_ADDR:
       val = mem_addr;
       break;
-    case MEM_SIZE:
+    case SB_INFRA_MEM_SIZE:
       val = mem_size;
       break;
-    case MEM_FLAGS:
+    case SB_INFRA_MEM_FLAGS:
       val = mem_flags;
       break;
-    case MEM_CMD:
+    case SB_INFRA_MEM_CMD:
       val = mem_cmd;
       break;
-    case MEM_RETURNC:
+    case SB_INFRA_MEM_RETURNC:
       val = mem_returncode;
       mem_returncode = 0xbaed;
       break;
-    case ACL_SET:
+    case SB_INFRA_ACL_SET:
       break;
-    case ACL_SADDR:
+    case SB_INFRA_ACL_SADDR:
       val = acl_saddr;
       break;
-    case ACL_SIZE:
+    case SB_INFRA_ACL_SIZE:
       val = acl_size;
       break;
-    case ACL_FLAGS:
+    case SB_INFRA_ACL_FLAGS:
       val = acl_flags;
       break;
-    case ACL_EN:
+    case SB_INFRA_ACL_EN:
       break;
     default:
       return false;
@@ -225,7 +228,7 @@ void MMIORead(volatile struct SimbricksProtoPcieH2DRead *read) {
   mmio_queue.push_back(op);
 }
 
-void MMIOWriteInfra(volatile struct SimbricksProtoPcieH2DWrite *write) {
+bool MMIOWriteInfra(volatile struct SimbricksProtoPcieH2DWrite *write) {
   uint64_t val = 0;
 
   assert(write->len == 8);
@@ -250,12 +253,13 @@ void MMIOWriteInfra(volatile struct SimbricksProtoPcieH2DWrite *write) {
       mem_flags = val;
       break;
     case SB_INFRA_MEM_CMD:
+      mem_cmd = val;
       if(val == SB_INFRA_MEM_CMD_ALLOC)
-        mem_returncode = global_mem_.allocate(mem_size, &mem_addr);
+        mem_returncode = global_mem.allocate(mem_size, &mem_addr);
       else if (val == SB_INFRA_MEM_CMD_RESERVE)
-        mem_returncode = global_mem_.reserve(mem_addr, mem_size);
+        mem_returncode = global_mem.reserve(mem_addr, mem_size);
       else if (val == SB_INFRA_MEM_CMD_RELEASE)
-        mem_returncode = global_mem_.release(mem_addr);
+        mem_returncode = global_mem.release(mem_addr);
       break;
     case SB_INFRA_MEM_RETURNC:
       break;
@@ -341,7 +345,7 @@ void PollEvent(void) {
 
   if (next_rising) {
     MMIOPoll();
-    DMAPoll();
+    //DMAPoll();
   }
 
   next_rising = !next_rising;

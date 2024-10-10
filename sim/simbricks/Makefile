@@ -2,7 +2,7 @@ include ../common.mk
 
 DESTDIR ?= $(CURDIR)
 
-SRC_DIR = $(VORTEX_HOME)/sim/rtlsim
+SRC_DIR = $(VORTEX_HOME)/sim/simbricks
 
 CXXFLAGS += -std=c++11 -Wall -Wextra -Wfatal-errors -Wno-array-bounds
 CXXFLAGS += -fPIC -Wno-maybe-uninitialized
@@ -10,9 +10,14 @@ CXXFLAGS += -I$(ROOT_DIR)/hw -I$(COMMON_DIR)
 CXXFLAGS += -I$(THIRD_PARTY_DIR)/softfloat/source/include
 CXXFLAGS += -I$(THIRD_PARTY_DIR)
 CXXFLAGS += -DXLEN_$(XLEN)
+#simbricks
+CXXFLAGS += -I/simbricks/lib
 
 LDFLAGS += $(THIRD_PARTY_DIR)/softfloat/build/Linux-x86_64-GCC/softfloat.a
 LDFLAGS += -L$(THIRD_PARTY_DIR)/ramulator -lramulator
+#simbricks
+LDFLAGS += -L/simbricks/lib 
+LDFLAGS += -lsimbricks
 
 # control RTL debug tracing states
 DBG_TRACE_FLAGS += -DDBG_TRACE_PIPELINE
@@ -36,6 +41,8 @@ RTL_INCLUDE = -I$(RTL_DIR) -I$(DPI_DIR) -I$(RTL_DIR)/libs -I$(RTL_DIR)/interface
 SRCS = $(COMMON_DIR)/util.cpp $(COMMON_DIR)/mem.cpp $(COMMON_DIR)/rvfloats.cpp
 SRCS += $(DPI_DIR)/util_dpi.cpp $(DPI_DIR)/float_dpi.cpp
 SRCS += $(SRC_DIR)/processor.cpp
+#simbricks
+SRCS += $(DESTDIR)/plumbing.o
 
 ifdef AXI_BUS
 	TOP = Vortex_axi
@@ -78,11 +85,14 @@ ifdef PERF
 	CXXFLAGS += -DPERF_ENABLE
 endif
 
-PROJECT := rtlsim
+PROJECT := vx-sbsim
 
 all: $(DESTDIR)/$(PROJECT)
 
-$(DESTDIR)/$(PROJECT): $(SRCS) $(SRC_DIR)/main.cpp
+$(DESTDIR)/plumbing.o:$(SRC_DIR)/plumbing.c
+	cc -L/simbricks/lib -I/simbricks/lib -c -o $@ $<
+
+$(DESTDIR)/$(PROJECT): $(SRCS) $(SRC_DIR)/sim.cpp
 	verilator --build $(VL_FLAGS) $^ -CFLAGS '$(CXXFLAGS) -DSTARTUP_ADDR=0x80000000' -LDFLAGS '$(LDFLAGS)' --Mdir $(DESTDIR)/obj_dir -o $@
 	
 $(DESTDIR)/lib$(PROJECT).so: $(SRCS)

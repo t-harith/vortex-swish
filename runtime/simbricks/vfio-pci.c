@@ -171,7 +171,7 @@ int vfio_irq_eventfd(struct vfio_dev *dev, uint32_t index,
         pfd[i] = fds[i];
     }
 
-    info = alloc;
+    info = (vfio_irq_set*) alloc;
     info->argsz = sz;
     info->flags = VFIO_IRQ_SET_DATA_EVENTFD | VFIO_IRQ_SET_ACTION_TRIGGER;;
     info->index = index;

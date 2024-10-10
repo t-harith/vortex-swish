@@ -119,14 +119,17 @@ int DeviceConfig::read(uint32_t addr, uint32_t* value) const {
 int dcr_initialize(vx_device_h hdevice) {
   const uint64_t startup_addr(STARTUP_ADDR);
 
+        printf("opeter 1 the device\n");
   RT_CHECK(vx_dcr_write(hdevice, VX_DCR_BASE_STARTUP_ADDR0, startup_addr & 0xffffffff), {
     return _ret;
   });
 
+        printf("opeter 2 the device\n");
   RT_CHECK(vx_dcr_write(hdevice, VX_DCR_BASE_STARTUP_ADDR1, startup_addr >> 32), {
     return _ret;
   });
 
+        printf("opeter 3 the device\n");
   RT_CHECK(vx_dcr_write(hdevice, VX_DCR_BASE_STARTUP_ARG0, 0), {
     return _ret;
   });

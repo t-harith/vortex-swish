@@ -679,6 +679,10 @@ int Processor::run() {
   return impl_->run();
 }
 
+void Processor::tick() {
+  impl_->tick();
+}
+
 void Processor::dcr_write(uint32_t addr, uint32_t value) {
   return impl_->dcr_write(addr, value);
 }
