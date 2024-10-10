@@ -231,7 +231,7 @@ public:
         for (uint64_t i = 0; i < size; i++) {
             ACCESS_REG8(dest_addr + i) = s[i]; 
         }
-        ACCESS_REG(SB_INFRA_ACL_EN) = true;
+        //ACCESS_REG(SB_INFRA_ACL_EN) = true; <-- this happens before the ram is finished being written to
 
         /*printf("VXDRV: upload %ld bytes from 0x%lx:", size, uintptr_t((uint8_t*)src));
         for (int i = 0;  i < (asize / CACHE_BLOCK_SIZE); ++i) {
@@ -291,6 +291,10 @@ public:
         // TODO Simbricks start
         ACCESS_REG8(SB_INFRA_PROC_START) = true;
 
+        future_ = std::async(std::launch::async, [&]{
+            while(ACCESS_REG8(SB_INFRA_PROC_START));
+        });
+
         // clear mpm cache
         mpm_cache_.clear();
 
@@ -310,7 +314,7 @@ public:
             if (0 == timeout_sec--)
                 return -1;
         }
-        profiling_end(profiling_id_);
+        //profiling_end(profiling_id_);
         return 0;
     }
 

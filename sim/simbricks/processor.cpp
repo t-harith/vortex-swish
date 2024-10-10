@@ -256,10 +256,12 @@ public:
     }
 
     if (!dram_queue_.empty()) {
-      if (dram_->send(dram_queue_.front()))
+      if (dram_->send(dram_queue_.front())) {
         dram_queue_.pop();
+      }
     }
 
+    this->cout_flush();
   #ifndef NDEBUG
     fflush(stdout);
   #endif

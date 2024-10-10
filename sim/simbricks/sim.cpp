@@ -328,7 +328,12 @@ static void MMIOPoll() {
     MMIOOp *op = mmio_queue.front();
     if (op->write) {
       dprintf("MMIO Write Submit: id %lu\n", op->opaque);
-      processor->dcr_write((uint32_t) op->offset, (uint32_t) op->val);
+      if(op->offset >= VX_DCR_BASE_STATE_BEGIN && op->offset <= VX_DCR_BASE_STATE_END){
+        printf("DCR write to  0x%lx = 0x%lx\n", op->offset, op->val);
+        processor->dcr_write((uint32_t) op->offset, (uint32_t) op->val);
+      } else {
+        ram.write(&op->val, op->offset, 1);
+      }
     } else {
       dprintf("MMIO Read Submit: id %lu\n", op->opaque);
       assert(false);
