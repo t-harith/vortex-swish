@@ -171,7 +171,7 @@ int run_kernel_test(const kernel_arg_t& kernel_arg) {
   std::cout << "verify result" << std::endl;
   for (uint32_t i = 0; i < num_points; ++i) {
     auto cur = h_dst[i];
-    auto ref = shuffle(i, NONCE);
+    auto ref = shuffle(i, NONCE) + 0xf00dba11;
     if (cur != ref) {
       printf("*** error: [%d] expected=%d, actual=%d\n", i, ref, cur);
       ++errors;

@@ -11,7 +11,7 @@ int main() {
 	uint32_t offset  = vx_core_id() * count;
 	
 	for (uint32_t i = 0; i < count; ++i) {
-		dst_ptr[offset + i] = src_ptr[offset + i];
+		dst_ptr[offset + i] = src_ptr[offset + i]+0xf00dba11;
 	}
 	
 	return 0;

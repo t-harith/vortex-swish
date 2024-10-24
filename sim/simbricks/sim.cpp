@@ -99,7 +99,6 @@ static int acl_flags;
 int InitState(void) {
   char arg0[] = "hw/hw";
   char *vargs[2] = {arg0, NULL};
-  const char* program = "printf";
 //  Verilated::commandArgs(1, vargs);
 //#ifdef TRACE_ENABLED
 //  Verilated::traceEverOn(true);
@@ -310,16 +309,16 @@ static void MMIOPoll() {
           val = processor->get_busy(); // returns true if device is running.
           break;
         default:
+          ram.read(&val, op->offset, 1);
           break;
       }
-      dprintf("MMIO Read Complete: id %lu val %lx\n", op->opaque,
-        (uint64_t) val);
       volatile union SimbricksProtoPcieD2H *msg = AllocPcieOut();
       volatile struct SimbricksProtoPcieD2HReadcomp *rc = &msg->readcomp;
       rc->req_id = op->opaque; // set req id so host can match resp to a req
       memcpy((void *) rc->data, &val, 8);
       SendPcieOut(msg, SIMBRICKS_PROTO_PCIE_D2H_MSG_READCOMP);
-
+      dprintf("MMIO Read Complete: id %lu val %lx\n", op->opaque,
+        (uint64_t) val);
     }
 
     delete op;
@@ -332,7 +331,7 @@ static void MMIOPoll() {
     if (op->write) {
       dprintf("MMIO Write Submit: id %lu\n", op->opaque);
       if(op->offset >= VX_DCR_BASE_STATE_BEGIN && op->offset <= VX_DCR_BASE_STATE_END){
-        printf("DCR write to  0x%lx = 0x%lx\n", op->offset, op->val);
+        dprintf("DCR write to  0x%lx = 0x%lx\n", op->offset, op->val);
         processor->dcr_write((uint32_t) op->offset, (uint32_t) op->val);
       } else {
         switch(op->offset) {

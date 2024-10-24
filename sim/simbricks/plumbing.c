@@ -79,11 +79,12 @@ static int InitSimBricks(void) {
     struct SimbricksProtoPcieDevIntro pcie_d_intro;
     memset(&pcie_d_intro, 0, sizeof(pcie_d_intro));
 
-    pcie_d_intro.bars[0].len = 1 << 24;
+    pcie_d_intro.bars[0].len = 0x20000000;
     pcie_d_intro.bars[0].flags = SIMBRICKS_PROTO_PCIE_BAR_64;
 
-    pcie_d_intro.pci_vendor_id = 0x9876;
-    pcie_d_intro.pci_device_id = 0x1234;
+    printf("initting simbricks\n");
+    pcie_d_intro.pci_vendor_id = 0xf001;
+    pcie_d_intro.pci_device_id = 0x1dea;
 
     pcie_d_intro.pci_class = 0x40;
     pcie_d_intro.pci_subclass = 0x00;

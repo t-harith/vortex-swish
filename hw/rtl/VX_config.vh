@@ -180,7 +180,7 @@
 `define IO_COUT_SIZE `MEM_BLOCK_SIZE
 
 `ifndef IO_MPM_ADDR
-`define IO_MPM_ADDR (`IO_COUT_ADDR + `IO_COUT_SIZE)
+`define IO_MPM_ADDR (1<<28)//(`IO_COUT_ADDR + `IO_COUT_SIZE)
 `endif
 `define IO_CSR_SIZE (4 * 64 * `NUM_CORES * `NUM_CLUSTERS)
 

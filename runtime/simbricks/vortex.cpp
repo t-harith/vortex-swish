@@ -250,10 +250,6 @@ public:
         if (src_addr + asize > GLOBAL_MEM_SIZE)
             return -1;
 
-        // TODO: Simbricks Mem download
-        // ram_.enable_acl(false);
-        // ram_.read((uint8_t*)dest, src_addr, size);
-        // ram_.enable_acl(true);
         ACCESS_REG(SB_INFRA_ACL_EN) = false;
         uint8_t* d = (uint8_t*)dest;
         for (uint64_t i = 0; i < size; i++) {
@@ -261,7 +257,7 @@ public:
         }
         ACCESS_REG(SB_INFRA_ACL_EN) = true;
 
-        /*printf("VXDRV: download %ld bytes to 0x%lx:", size, uintptr_t((uint8_t*)dest));
+        /*printf("VXDRV: download %ld bytes from 0x%lx to 0x%lx:\n", size, src_addr, uintptr_t((uint8_t*)dest));
         for (int i = 0;  i < (asize / CACHE_BLOCK_SIZE); ++i) {
             printf("\n0x%08lx=", src_addr + i * CACHE_BLOCK_SIZE);
             for (int j = 0;  j < CACHE_BLOCK_SIZE; ++j) {
@@ -288,7 +284,6 @@ public:
         profiling_begin(profiling_id_);
 
         // start new run
-        // TODO Simbricks start
         this->reset();
         ACCESS_REG8(SB_INFRA_PROC_START) = true;
 
@@ -319,7 +314,7 @@ public:
             if (0 == timeout_sec--)
                 return -1;
         }
-        //profiling_end(profiling_id_);
+        profiling_end(profiling_id_);
         return 0;
     }
 
