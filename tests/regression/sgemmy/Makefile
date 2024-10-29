@@ -1,14 +1,14 @@
 ROOT_DIR := $(realpath ../../..)
 include $(ROOT_DIR)/config.mk
 
-PROJECT := io_addr
+PROJECT := sgemmy
 
 SRC_DIR := $(VORTEX_HOME)/tests/regression/$(PROJECT)
 
-SRCS := $(SRC_DIR)/main.cpp
+SRCS := $(SRC_DIR)/main.cpp 
 
 VX_SRCS := $(SRC_DIR)/kernel.cpp
 
-OPTS ?= -n16
+OPTS ?= -n32
 
 include ../common.mk
