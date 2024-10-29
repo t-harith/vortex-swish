@@ -341,10 +341,12 @@ public:
         if (offset > 31)
             return -1;
         if (mpm_cache_.count(core_id) == 0) {
-            uint64_t mpm_mem_addr = IO_MPM_ADDR + core_id * 32 * sizeof(uint64_t);
+            uint64_t mpm_mem_addr = /*IO_MPM_ADDR +*/ core_id * 32 * sizeof(uint64_t);
+            ACCESS_REG(SB_INFRA_MPM_DOMAIN) = 1; 
             CHECK_ERR(this->download(mpm_cache_[core_id].data(), mpm_mem_addr, 32 * sizeof(uint64_t)), {
                 return err;
             });
+            ACCESS_REG(SB_INFRA_MPM_DOMAIN) = 0; 
         }
         *value = mpm_cache_.at(core_id).at(offset);
         return 0;

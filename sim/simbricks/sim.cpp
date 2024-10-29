@@ -91,6 +91,7 @@ static uint64_t mem_cmd;
 
 static uint64_t acl_saddr, acl_size;
 static int acl_flags;
+static int mpm_domain;
 
 //#ifdef TRACE_ENABLED
 //static VerilatedVcdC *trace;
@@ -151,7 +152,7 @@ void Finalize(void) {
 
 bool MMIOReadInfra(volatile struct SimbricksProtoPcieH2DRead *read) {
   uint64_t val = 0;
-
+  if(mpm_domain) return false;
   switch(read->offset) {
     case SB_INFRA_PROC_RST:
       break;
@@ -188,6 +189,9 @@ bool MMIOReadInfra(volatile struct SimbricksProtoPcieH2DRead *read) {
     case SB_INFRA_ACL_FLAGS:
       val = acl_flags;
       break;
+    case SB_INFRA_MPM_DOMAIN:
+      val = mpm_domain;
+      break;
     case SB_INFRA_ACL_EN:
       break;
     default:
@@ -220,7 +224,7 @@ void MMIORead(volatile struct SimbricksProtoPcieH2DRead *read) {
   assert(read->len == 8);
 
   MMIOOp *op = new MMIOOp;
-  op->offset = read->offset;
+  op->offset = (mpm_domain) ? read->offset+IO_MPM_ADDR : read->offset;
   op->write = false;
   op->opaque = read->req_id;
   mmio_queue.push_back(op);
@@ -266,6 +270,9 @@ bool MMIOWriteInfra(volatile struct SimbricksProtoPcieH2DWrite *write) {
       break;
     case SB_INFRA_ACL_FLAGS:
       acl_flags = val;
+      break;
+    case SB_INFRA_MPM_DOMAIN:
+      mpm_domain = val;
       break;
     default:
       return false;

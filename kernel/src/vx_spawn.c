@@ -191,6 +191,52 @@ static void __attribute__ ((noinline)) process_all_task_groups() {
   }
 }
 
+#ifdef XLEN_64
+    #define DUMP_CSRS(i) \
+        ((int64_t*)csr_mem)[i] = csr_read(VX_CSR_MPM_BASE +i)
+#else
+    #define DUMP_CSRS(i) \
+        csr_mem[(i*2)+0] = csr_read(VX_CSR_MPM_BASE + i); \
+        csr_mem[(i*2)+1] = csr_read(VX_CSR_MPM_BASE + i + (VX_CSR_MPM_BASE_H - VX_CSR_MPM_BASE))
+#endif
+
+void vx_perf_dump() {
+    int core_id = vx_core_id();
+    uint32_t * const csr_mem = (uint32_t*)((0xFF000000+(1<<14)+64) + 64 * sizeof(uint32_t) * core_id);
+    DUMP_CSRS(0);
+    DUMP_CSRS(1);
+    DUMP_CSRS(2);
+    DUMP_CSRS(3);
+    DUMP_CSRS(4);
+    DUMP_CSRS(5);
+    DUMP_CSRS(6);
+    DUMP_CSRS(7);
+    DUMP_CSRS(8);
+    DUMP_CSRS(9);
+    DUMP_CSRS(10);
+    DUMP_CSRS(11);
+    DUMP_CSRS(12);
+    DUMP_CSRS(13);
+    DUMP_CSRS(14);
+    DUMP_CSRS(15);
+    DUMP_CSRS(16);
+    DUMP_CSRS(17);
+    DUMP_CSRS(18);
+    DUMP_CSRS(19);
+    DUMP_CSRS(20);
+    DUMP_CSRS(21);
+    DUMP_CSRS(22);
+    DUMP_CSRS(23);
+    DUMP_CSRS(24);
+    DUMP_CSRS(25);
+    DUMP_CSRS(26);
+    DUMP_CSRS(27);
+    DUMP_CSRS(28);
+    DUMP_CSRS(29);
+    DUMP_CSRS(30);
+    DUMP_CSRS(31);
+}
+
 static void __attribute__ ((noinline)) process_all_task_groups_stub() {
   wspawn_task_groups_args_t* targs = (wspawn_task_groups_args_t*)csr_read(VX_CSR_MSCRATCH);
   int warps_per_group = targs->warps_per_group;
@@ -198,7 +244,6 @@ static void __attribute__ ((noinline)) process_all_task_groups_stub() {
   int warp_id = vx_warp_id();
   int group_warp_id = warp_id % warps_per_group;
   int threads_mask = (group_warp_id == warps_per_group-1) ? remaining_mask : -1;
-
   // activate threads
   vx_tmc(threads_mask);
 
@@ -206,6 +251,7 @@ static void __attribute__ ((noinline)) process_all_task_groups_stub() {
   process_all_task_groups();
 
   // disable all warps except warp0
+  vx_perf_dump();
   vx_tmc(0 == warp_id);
 }
 
