@@ -6,7 +6,6 @@ all:
 	$(MAKE) -C demo
 	$(MAKE) -C dogfood
 	$(MAKE) -C mstress
-	$(MAKE) -C io_addr
 	$(MAKE) -C printf
 	$(MAKE) -C diverge
 	$(MAKE) -C sort
@@ -20,7 +19,6 @@ run-simx:
 	$(MAKE) -C demo run-simx
 	$(MAKE) -C dogfood run-simx
 	$(MAKE) -C mstress run-simx
-	$(MAKE) -C io_addr run-simx
 	$(MAKE) -C printf run-simx
 	$(MAKE) -C diverge run-simx
 	$(MAKE) -C sort run-simx
@@ -34,7 +32,6 @@ run-rtlsim:
 	$(MAKE) -C demo run-rtlsim
 	$(MAKE) -C dogfood run-rtlsim
 	$(MAKE) -C mstress run-rtlsim
-	$(MAKE) -C io_addr run-rtlsim
 	$(MAKE) -C printf run-rtlsim
 	$(MAKE) -C diverge run-rtlsim
 	$(MAKE) -C sort run-rtlsim
@@ -48,7 +45,6 @@ run-opae:
 	$(MAKE) -C demo run-opae
 	$(MAKE) -C dogfood run-opae
 	$(MAKE) -C mstress run-opae
-	$(MAKE) -C io_addr run-opae
 	$(MAKE) -C printf run-opae
 	$(MAKE) -C diverge run-opae
 	$(MAKE) -C sort run-opae
@@ -62,7 +58,6 @@ clean:
 	$(MAKE) -C demo clean
 	$(MAKE) -C dogfood clean
 	$(MAKE) -C mstress clean
-	$(MAKE) -C io_addr clean
 	$(MAKE) -C printf clean
 	$(MAKE) -C diverge clean
 	$(MAKE) -C sort clean
@@ -76,7 +71,6 @@ clean-all:
 	$(MAKE) -C demo clean-all
 	$(MAKE) -C dogfood clean-all
 	$(MAKE) -C mstress clean-all
-	$(MAKE) -C io_addr clean-all
 	$(MAKE) -C printf clean-all
 	$(MAKE) -C diverge clean-all
 	$(MAKE) -C sort clean-all

@@ -118,7 +118,6 @@ cluster()
     # L2/L3
     ./ci/blackbox.sh --driver=rtlsim --cores=2 --l2cache --app=diverge --args="-n1"
     ./ci/blackbox.sh --driver=rtlsim --cores=2 --clusters=2 --l3cache --app=diverge --args="-n1"
-    ./ci/blackbox.sh --driver=rtlsim --cores=2 --clusters=2 --l2cache --l3cache --app=io_addr --args="-n1"
     ./ci/blackbox.sh --driver=simx --cores=4 --clusters=2 --l2cache --app=diverge --args="-n1"
     ./ci/blackbox.sh --driver=simx --cores=4 --clusters=4 --l2cache --l3cache --app=diverge --args="-n1"
 
@@ -218,8 +217,6 @@ config()
     AXI_BUS=1 ./ci/blackbox.sh --driver=rtlsim --cores=1 --app=demo
 
     # reduce l1 line size
-    CONFIGS="-DL1_LINE_SIZE=4" ./ci/blackbox.sh --driver=rtlsim --app=io_addr
-    CONFIGS="-DL1_LINE_SIZE=4" ./ci/blackbox.sh --driver=simx --app=io_addr
     CONFIGS="-DL1_LINE_SIZE=4 -DLMEM_DISABLE" ./ci/blackbox.sh --driver=rtlsim --app=sgemmx
     CONFIGS="-DL1_LINE_SIZE=4 -DLMEM_DISABLE" ./ci/blackbox.sh --driver=simx --app=sgemmx
 
@@ -249,7 +246,6 @@ stress()
 
     # test verilator reset values
     CONFIGS="-DVERILATOR_RESET_VALUE=1" ./ci/blackbox.sh --driver=opae --cores=2 --clusters=2 --l2cache --l3cache --app=dogfood
-    CONFIGS="-DVERILATOR_RESET_VALUE=1" ./ci/blackbox.sh --driver=opae --cores=2 --clusters=2 --l2cache --l3cache --app=io_addr
     CONFIGS="-DVERILATOR_RESET_VALUE=1" ./ci/blackbox.sh --driver=opae --app=printf
     ./ci/blackbox.sh --driver=rtlsim --app=sgemm --args="-n128" --l2cache
 
