@@ -50,7 +50,7 @@ public:
   static const char* type_str() {
     return "float";
   }
-  static int generate() {
+  static float generate() {
     return static_cast<float>(rand()) / RAND_MAX;
   }
   static bool compare(float a, float b, int index, int errors) {
@@ -69,20 +69,22 @@ public:
   }
 };
 
-static void uneven_matmul_cpu(TYPE* out, const TYPE* A, const TYPE* B, uint32_t width, uint32_t height) {
-  for (uint32_t row = 0; row < height; ++row) {
-    for (uint32_t col = 0; col < width; ++col) {
+static void uneven_matmul_cpu(TYPE* out, const TYPE* A, const TYPE* B, uint32_t A_width, uint32_t A_height, uint32_t B_width, uint32_t B_height) {
+  if(A_width != B_height)
+    printf("*** error: Matrices A and B NOT ALIGNED. A_width=[%d] B_height=[%d]\n", A_width, B_height);
+  for (uint32_t row = 0; row < A_height; ++row) {
+    for (uint32_t col = 0; col < B_width; ++col) {
       TYPE sum(0);
-      for (uint32_t e = 0; e < width; ++e) {
-          sum += A[row * width + e] * B[e * width + col];
+      for (uint32_t e = 0; e < A_width; ++e) {
+          sum += A[row * A_width + e] * B[e * B_width + col];
       }
-      out[row * width + col] = sum;
+      out[row * B_width + col] = sum;
     }
   }
 }
 
 const char* kernel_file = "kernel.vxbin";
-uint32_t size = 32;
+uint32_t size = 8;
 
 vx_device_h device = nullptr;
 vx_buffer_h A_buffer = nullptr;
@@ -143,7 +145,8 @@ int main(int argc, char *argv[]) {
   /*
    *  ATTENTION: REPLACE INSTANCES OF SIZE WITH WIDTH AND HEIGHT
    */
-  uint32_t width = 32, height = 16;
+  uint32_t A_width = 8, A_height = 4;
+  uint32_t B_width = 4, B_height = 8;
   uint32_t size_sq = size * size;
   uint32_t buf_size = size_sq * sizeof(TYPE);
 
@@ -218,8 +221,8 @@ int main(int argc, char *argv[]) {
   std::cout << "verify result" << std::endl;
   int errors = 0;
   {
-    std::vector<TYPE> h_ref(width*height);
-    uneven_matmul_cpu(h_ref.data(), h_A.data(), h_B.data(), width, height);
+    std::vector<TYPE> h_ref(size_sq);
+    uneven_matmul_cpu(h_ref.data(), h_A.data(), h_B.data(), A_width, A_height, B_width, B_height);
 
     for (uint32_t i = 0; i < h_C.size(); ++i) {
       if (!Comparator<TYPE>::compare(h_C[i], h_ref[i], i, errors)) {
